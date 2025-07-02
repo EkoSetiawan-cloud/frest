@@ -59,13 +59,13 @@ def ets_rolling_eval_page():
         ax.legend()
         st.pyplot(fig)
 
-        # ====== Prediksi 2 Tahun ke Depan (Tabel & Grafik Baru) ======
+        # ====== Prediksi 1 Tahun ke Depan (Tabel & Grafik Baru) ======
         try:
             full_series = np.concatenate([train_series, test_series])
             final_model = ExponentialSmoothing(full_series, trend=trend, seasonal=seasonal, seasonal_periods=None)
             final_fit = final_model.fit(optimized=True)
             forecast_future = final_fit.forecast(steps=2)
-            future_years = [df_test['Tahun'].iloc[-1] + i + 1 for i in range(2)]
+            future_years = [df_test['Tahun'].iloc[-1] + i + 1 for i in range(1)]
             df_future = pd.DataFrame({
                 "Tahun": future_years,
                 "Forecast": forecast_future
@@ -73,18 +73,18 @@ def ets_rolling_eval_page():
         except Exception as e:
             df_future = pd.DataFrame({"Tahun": [], "Forecast": []})
 
-        # Tampilkan tabel prediksi 2 tahun ke depan
-        st.subheader("🔮 Prediksi PNBP Dua Tahun ke Depan (2025 & 2026)")
+        # Tampilkan tabel prediksi 1 tahun ke depan
+        st.subheader("🔮 Prediksi PNBP Dua Tahun ke Depan (2025)")
         st.write("Prediksi ini menggunakan seluruh data historis hingga tahun terakhir (2024).")
         st.write(df_future)
 
-        # Plot grafik baru khusus prediksi 2 tahun ke depan (misal bar chart)
+        # Plot grafik baru khusus prediksi 1 tahun ke depan (misal bar chart)
         if not df_future.empty:
             fig2, ax2 = plt.subplots()
             ax2.bar(df_future["Tahun"].astype(str), df_future["Forecast"], color="red", alpha=0.8)
             ax2.set_xlabel("Tahun")
             ax2.set_ylabel("Forecast PNBP")
-            ax2.set_title("Forecast PNBP Tahun 2025 & 2026")
+            ax2.set_title("Forecast PNBP Tahun 2025")
             for i, v in enumerate(df_future["Forecast"]):
                 ax2.text(i, v, f"{int(v):,}", ha='center', va='bottom', fontsize=10, color="red")
             st.pyplot(fig2)
