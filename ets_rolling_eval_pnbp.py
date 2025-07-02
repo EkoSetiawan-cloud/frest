@@ -5,29 +5,51 @@ from statsmodels.tsa.holtwinters import ExponentialSmoothing
 import matplotlib.pyplot as plt
 
 def ets_rolling_eval_page():
-    st.header("🔵 Exponential Smoothing (ETS) Rolling Forecast & Evaluasi")
+    st.header("🔵 5️⃣ Exponential Smoothing (ETS) Rolling Forecast & Evaluasi")
+    st.markdown("""
+    <div style="background-color:#EDE7F6; padding:14px; border-radius:10px; margin-bottom:10px;">
+    <b>Deskripsi:</b><br>
+    <b>Exponential Smoothing (ETS)</b> adalah salah satu metode time series forecasting yang mampu menangkap pola trend dan musiman.<br>
+    <b>Rolling Forecast</b> berarti model selalu di-update tiap tahun dengan data terbaru agar evaluasi lebih realistis.
+    </div>
+    """, unsafe_allow_html=True)
+
     df_train = st.session_state.get('train_df')
     df_test = st.session_state.get('test_df')
-    if df_train is not None and df_test is not None:
+    if df_train is not None and df_test is not None and not df_train.empty and not df_test.empty:
+        with st.expander("ℹ️ Penjelasan Pilihan Model ETS", expanded=False):
+            st.markdown("""
+            <ul>
+                <li><b>Tipe Trend</b>: <i>add</i> = trend naik/turun linear, <i>mul</i> = pertumbuhan relatif/persen, <i>None</i> = tanpa trend</li>
+                <li><b>Tipe Seasonal</b>: <i>add</i> = musiman tetap, <i>mul</i> = musiman proporsional, <i>None</i> = tanpa musiman</li>
+            </ul>
+            """, unsafe_allow_html=True)
+
         trend = st.selectbox("Tipe Trend", ["add", "mul", None], index=0)
         seasonal = st.selectbox("Tipe Seasonal", [None, "add", "mul"], index=0)
-        st.info("Model ETS: trend={}, seasonal={}".format(trend, seasonal))
+        st.info(f"Model ETS yang dipilih: trend = {trend}, seasonal = {seasonal}")
 
-        train_series = df_train['Total_PNBP'].values
-        test_series = df_test['Total_PNBP'].values
+        train_series = df_train['Total_PNBP'].astype(float).values
+        test_series = df_test['Total_PNBP'].astype(float).values
 
         history = list(train_series)
         predictions = []
+        error_msgs = []
         for t in range(len(test_series)):
             try:
-                model = ExponentialSmoothing(history, trend=trend, seasonal=seasonal, seasonal_periods=None)
+                model = ExponentialSmoothing(
+                    history,
+                    trend=trend,
+                    seasonal=seasonal,
+                    seasonal_periods=None
+                )
                 model_fit = model.fit(optimized=True)
                 yhat = model_fit.forecast(1)[0]
             except Exception as e:
                 yhat = np.nan
+                error_msgs.append(f"Tahun {df_test['Tahun'].iloc[t]}: {e}")
             predictions.append(yhat)
             history.append(test_series[t])
-            st.write(f"Step {t+1}: Tahun {df_test['Tahun'].iloc[t]}, predicted={yhat:.2f}, expected={test_series[t]:.2f}")
 
         # Evaluasi
         actuals = test_series
@@ -35,22 +57,36 @@ def ets_rolling_eval_page():
         rmse = np.sqrt(np.mean((np.array(predictions) - actuals) ** 2))
         mape = np.mean(np.abs((np.array(predictions) - actuals) / actuals)) * 100
 
-        st.write("## Evaluasi Hasil Prediksi (ETS)")
-        st.write(f"MAE: {mae:.2f}")
-        st.write(f"RMSE: {rmse:.2f}")
-        st.write(f"MAPE: {mape:.2f}%")
-        
+        # Penilaian otomatis performa
+        if mape < 10:
+            cat_perf = "🔵 <b>Sangat Baik</b>"
+        elif mape < 20:
+            cat_perf = "🟢 <b>Baik</b>"
+        elif mape < 30:
+            cat_perf = "🟡 <b>Cukup</b>"
+        else:
+            cat_perf = "🔴 <b>Kurang</b> (perbaiki parameter/model atau cek data)"
+
+        # Tabel hasil rolling
         df_eval = pd.DataFrame({
             "Tahun": df_test['Tahun'],
             "Actual": actuals,
             "Forecast": predictions
         })
-        st.write(df_eval)
+        st.markdown("#### 🗃️ Tabel Hasil Prediksi vs Aktual")
+        st.dataframe(df_eval, use_container_width=True)
 
-        # SIMPAN MODEL TERAKHIR (ETS)
-        st.session_state['rolling_eval_result_ets'] = df_eval
+        # Download tabel prediksi
+        csv = df_eval.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="⬇️ Download Hasil Prediksi (CSV)",
+            data=csv,
+            file_name="hasil_prediksi_ETS.csv",
+            mime="text/csv"
+        )
 
         # Plot
+        st.markdown("#### 📊 Visualisasi Prediksi vs Aktual (ETS Rolling Forecast)")
         fig, ax = plt.subplots()
         ax.plot(df_eval["Tahun"], df_eval["Actual"], label="Actual", marker="o")
         ax.plot(df_eval["Tahun"], df_eval["Forecast"], label="ETS Forecast", marker="o")
@@ -59,5 +95,30 @@ def ets_rolling_eval_page():
         ax.set_title("ETS Forecast vs Actual (Rolling Forecast)")
         ax.legend()
         st.pyplot(fig)
+
+        # Evaluasi metrik
+        st.markdown("#### 📦 Evaluasi Hasil Prediksi (ETS)")
+        col1, col2, col3, col4 = st.columns([1,1,1,2])
+        col1.metric("MAE", f"{mae:,.2f}")
+        col2.metric("RMSE", f"{rmse:,.2f}")
+        col3.metric("MAPE (%)", f"{mape:.2f}")
+        col4.markdown(f"<b>Kategori Akurasi:</b><br>{cat_perf}", unsafe_allow_html=True)
+
+        if error_msgs:
+            with st.expander("⚠️ Terdapat error pada beberapa langkah rolling:", expanded=False):
+                for msg in error_msgs:
+                    st.error(msg)
+
+        # SIMPAN MODEL TERAKHIR (ETS)
+        st.session_state['rolling_eval_result_ets'] = df_eval
+
+        st.success("✅ Proses rolling forecast ETS selesai. Lanjut ke *Residual Analysis* untuk analisis error prediksi.")
     else:
-        st.info("Selesaikan step split train-test dulu.")
+        st.info("Belum ada data train-test. Selesaikan langkah sebelumnya terlebih dahulu.")
+
+    st.markdown("""
+    ---
+    <span style="color:gray; font-size:14px;">
+    <b>Tips:</b> Coba beberapa kombinasi parameter trend/seasonal untuk hasil optimal. Cek residual error setelah rolling forecast.
+    </span>
+    """, unsafe_allow_html=True)
