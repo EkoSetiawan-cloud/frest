@@ -23,7 +23,7 @@ def input_data_page():
 
             # Preview data
             st.subheader("👁️ Preview 5 Baris Pertama")
-            st.dataframe(df.head().style.highlight_null(null_color='orange'))
+            st.dataframe(df.head())
             
             # Info struktur data
             st.markdown("#### 📋 Info Kolom & Tipe Data")
