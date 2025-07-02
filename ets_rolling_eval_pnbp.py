@@ -49,7 +49,7 @@ def ets_rolling_eval_page():
 
         st.session_state['rolling_eval_result_ets'] = df_eval
 
-        # Plot rolling forecast saja (tanpa prediksi masa depan)
+        # Plot rolling forecast (tanpa prediksi masa depan)
         fig, ax = plt.subplots()
         ax.plot(df_eval["Tahun"], df_eval["Actual"], label="Actual", marker="o")
         ax.plot(df_eval["Tahun"], df_eval["Forecast"], label="ETS Forecast", marker="o")
@@ -64,27 +64,27 @@ def ets_rolling_eval_page():
             full_series = np.concatenate([train_series, test_series])
             final_model = ExponentialSmoothing(full_series, trend=trend, seasonal=seasonal, seasonal_periods=None)
             final_fit = final_model.fit(optimized=True)
-            forecast_future = final_fit.forecast(steps=2)
-            future_years = [df_test['Tahun'].iloc[-1] + i + 1 for i in range(1)]
+            forecast_future = final_fit.forecast(steps=1)
+            future_year = [df_test['Tahun'].iloc[-1] + 1]
             df_future = pd.DataFrame({
-                "Tahun": future_years,
+                "Tahun": future_year,
                 "Forecast": forecast_future
             })
         except Exception as e:
             df_future = pd.DataFrame({"Tahun": [], "Forecast": []})
 
         # Tampilkan tabel prediksi 1 tahun ke depan
-        st.subheader("🔮 Prediksi PNBP Dua Tahun ke Depan (2025)")
+        st.subheader("🔮 Prediksi PNBP Satu Tahun ke Depan")
         st.write("Prediksi ini menggunakan seluruh data historis hingga tahun terakhir (2024).")
         st.write(df_future)
 
-        # Plot grafik baru khusus prediksi 1 tahun ke depan (misal bar chart)
+        # Plot grafik baru khusus prediksi 1 tahun ke depan
         if not df_future.empty:
             fig2, ax2 = plt.subplots()
             ax2.bar(df_future["Tahun"].astype(str), df_future["Forecast"], color="red", alpha=0.8)
             ax2.set_xlabel("Tahun")
             ax2.set_ylabel("Forecast PNBP")
-            ax2.set_title("Forecast PNBP Tahun 2025")
+            ax2.set_title(f"Forecast PNBP Tahun {future_year[0]}")
             for i, v in enumerate(df_future["Forecast"]):
                 ax2.text(i, v, f"{int(v):,}", ha='center', va='bottom', fontsize=10, color="red")
             st.pyplot(fig2)
