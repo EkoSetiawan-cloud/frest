@@ -51,7 +51,7 @@ def ets_rolling_eval_page():
 
         # ====== Prediksi 2 Tahun ke Depan ======
         try:
-            # Gunakan seluruh data historis (train+test)
+            # Gabungkan data train+test untuk prediksi masa depan
             full_series = np.concatenate([train_series, test_series])
             final_model = ExponentialSmoothing(full_series, trend=trend, seasonal=seasonal, seasonal_periods=None)
             final_fit = final_model.fit(optimized=True)
@@ -64,15 +64,24 @@ def ets_rolling_eval_page():
         except Exception as e:
             df_future = pd.DataFrame({"Tahun": [], "Forecast": []})
 
-        # ====== Plot Hasil Rolling dan Prediksi Masa Depan ======
+        # ====== Plot Hasil Rolling & Future ======
         fig, ax = plt.subplots()
         ax.plot(df_eval["Tahun"], df_eval["Actual"], label="Actual", marker="o")
         ax.plot(df_eval["Tahun"], df_eval["Forecast"], label="ETS Forecast", marker="o")
 
+        # Tambahkan plot prediksi masa depan (2025 & 2026)
         if not df_future.empty:
             ax.plot(df_future["Tahun"], df_future["Forecast"], label="Forecast Future", marker="o", linestyle="--", color="red")
             for x, y in zip(df_future["Tahun"], df_future["Forecast"]):
-                ax.annotate(f"{int(y):,}", (x, y), textcoords="offset points", xytext=(0,10), ha='center', fontsize=8, color="red")
+                ax.annotate(f"{int(y):,}", (x, y), textcoords="offset points", xytext=(0, 20), ha='center', fontsize=9, color="red")
+
+        # Perbaiki batas sumbu-y agar label tidak kepotong
+        max_y = max(
+            np.nanmax(df_eval["Actual"]), 
+            np.nanmax(df_eval["Forecast"]), 
+            np.nanmax(df_future["Forecast"] if not df_future.empty else [0])
+        )
+        ax.set_ylim(None, max_y * 1.12)  # Atur margin 12% di atas nilai maksimum
 
         ax.set_xlabel("Tahun")
         ax.set_ylabel("Total PNBP")
