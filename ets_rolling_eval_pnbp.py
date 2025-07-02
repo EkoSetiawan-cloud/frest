@@ -47,38 +47,46 @@ def ets_rolling_eval_page():
         })
         st.write(df_eval)
 
-        # Simpan model terakhir
         st.session_state['rolling_eval_result_ets'] = df_eval
 
-        # Plot
-        fig, ax = plt.subplots()
-        ax.plot(df_eval["Tahun"], df_eval["Actual"], label="Actual", marker="o")
-        ax.plot(df_eval["Tahun"], df_eval["Forecast"], label="ETS Forecast", marker="o")
-        ax.plot(df_future["Tahun"], df_future["Forecast"], label="Forecast Future", marker="o", linestyle="--", color="red")
-        ax.set_xlabel("Tahun")
-        ax.set_ylabel("Total PNBP")
-        ax.set_title("ETS Forecast vs Actual (Rolling Forecast)")
-        ax.legend()
-        st.pyplot(fig)
-
         # ====== Prediksi 2 Tahun ke Depan ======
-        # Latih model pada seluruh data historis
-        full_series = np.concatenate([train_series, test_series])
         try:
+            # Gunakan seluruh data historis (train+test)
+            full_series = np.concatenate([train_series, test_series])
             final_model = ExponentialSmoothing(full_series, trend=trend, seasonal=seasonal, seasonal_periods=None)
             final_fit = final_model.fit(optimized=True)
             forecast_future = final_fit.forecast(steps=2)
+            future_years = [df_test['Tahun'].iloc[-1] + i + 1 for i in range(2)]
+            df_future = pd.DataFrame({
+                "Tahun": future_years,
+                "Forecast": forecast_future
+            })
         except Exception as e:
-            forecast_future = [np.nan, np.nan]
+            df_future = pd.DataFrame({"Tahun": [], "Forecast": []})
 
-        future_years = [df_test['Tahun'].iloc[-1] + i + 1 for i in range(2)]
-        df_future = pd.DataFrame({
-            "Tahun": future_years,
-            "Forecast": forecast_future
-        })
-        st.subheader("🔮 Prediksi PNBP Dua Tahun ke Depan (2025 & 2026)")
-        st.write("Prediksi ini menggunakan seluruh data historis hingga tahun terakhir (2024).")
-        st.write(df_future)
+        # ====== Plot Hasil Rolling dan Prediksi Masa Depan ======
+        fig, ax = plt.subplots()
+        ax.plot(df_eval["Tahun"], df_eval["Actual"], label="Actual", marker="o")
+        ax.plot(df_eval["Tahun"], df_eval["Forecast"], label="ETS Forecast", marker="o")
+
+        if not df_future.empty:
+            ax.plot(df_future["Tahun"], df_future["Forecast"], label="Forecast Future", marker="o", linestyle="--", color="red")
+            for x, y in zip(df_future["Tahun"], df_future["Forecast"]):
+                ax.annotate(f"{int(y):,}", (x, y), textcoords="offset points", xytext=(0,10), ha='center', fontsize=8, color="red")
+
+        ax.set_xlabel("Tahun")
+        ax.set_ylabel("Total PNBP")
+        ax.set_title("ETS Forecast vs Actual + 2 Tahun Prediksi ke Depan")
+        ax.legend()
+        st.pyplot(fig)
+
+        # Tampilkan tabel prediksi 2 tahun ke depan
+        if not df_future.empty:
+            st.subheader("🔮 Prediksi PNBP Dua Tahun ke Depan (2025 & 2026)")
+            st.write("Prediksi ini menggunakan seluruh data historis hingga tahun terakhir (2024).")
+            st.write(df_future)
+        else:
+            st.info("Prediksi masa depan tidak tersedia.")
 
     else:
         st.info("Selesaikan step split train-test dulu.")
