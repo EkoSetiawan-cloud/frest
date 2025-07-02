@@ -99,9 +99,9 @@ def ets_rolling_eval_page():
         # Evaluasi metrik
         st.markdown("#### 📦 Evaluasi Hasil Prediksi (ETS)")
         col1, col2, col3, col4 = st.columns([1.5,1.5,1,2])
-        col1.markdown(f"""<div style='font-size:2rem; font-weight:600;'>{mae:,.2f}</div><div style='color:gray;'>MAE</div>""", unsafe_allow_html=True)
-        col2.markdown(f"""<div style='font-size:2rem; font-weight:600;'>{rmse:,.2f}</div><div style='color:gray;'>RMSE</div>""", unsafe_allow_html=True)
-        col3.markdown(f"""<div style='font-size:2rem; font-weight:600;'>{mape:.2f}%</div><div style='color:gray;'>MAPE</div>""", unsafe_allow_html=True)
+        col1.markdown(f"""<div style='font-size:1.3rem; font-weight:500; padding-bottom:2px'>{mae:,.2f}</div><div style='color:gray; font-size:0.95rem;'>MAE</div>""", unsafe_allow_html=True)
+        col2.markdown(f"""<div style='font-size:1.3rem; font-weight:500; padding-bottom:2px'>{rmse:,.2f}</div><div style='color:gray; font-size:0.95rem;'>RMSE</div>""", unsafe_allow_html=True)
+        col3.markdown(f"""<div style='font-size:1.3rem; font-weight:500; padding-bottom:2px'>{mape:.2f}%</div><div style='color:gray; font-size:0.95rem;'>MAPE</div>""", unsafe_allow_html=True)
         col4.markdown(f"<b>Kategori Akurasi:</b><br>{cat_perf}", unsafe_allow_html=True)
 
 
