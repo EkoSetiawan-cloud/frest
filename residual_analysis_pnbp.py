@@ -52,7 +52,7 @@ def residual_analysis_page():
         ax.axhline(0, ls="--", color="gray", lw=1)
         ax.set_xlabel("Tahun")
         ax.set_ylabel("Residual")
-        ax.set_title("Residual (Forecast - Actual) per Tahun")
+        ax.set_title("Residual (Forecast - Actual) per Year")
         st.pyplot(fig)
 
         # Deteksi outlier & bias
