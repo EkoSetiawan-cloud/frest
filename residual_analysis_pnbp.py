@@ -42,17 +42,17 @@ def residual_analysis_page():
         st.success(f"Analisis residual berdasarkan model: **{model_name}**")
 
         # Tabel & Grafik Residual
-        st.markdown("#### 📈 Residual (Prediksi - Aktual) per Tahun")
-        df_resid = df_rolling[["Tahun"]].copy()
+        st.markdown("#### 📈 Residual (Forecast - Actual) per Year")
+        df_resid = df_rolling[["Year"]].copy()
         df_resid["Residual"] = residuals
         st.dataframe(df_resid)
 
         fig, ax = plt.subplots()
-        ax.plot(df_resid["Tahun"], df_resid["Residual"], marker="o", linestyle='-', color="#7E57C2")
+        ax.plot(df_resid["Year"], df_resid["Residual"], marker="o", linestyle='-', color="#7E57C2")
         ax.axhline(0, ls="--", color="gray", lw=1)
-        ax.set_xlabel("Tahun")
+        ax.set_xlabel("Year")
         ax.set_ylabel("Residual")
-        ax.set_title("Residual (Prediksi - Aktual) per Tahun")
+        ax.set_title("Residual (Forecast - Actual) per Year")
         st.pyplot(fig)
 
         # Deteksi outlier & bias
