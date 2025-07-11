@@ -42,7 +42,7 @@ def residual_analysis_page():
         st.success(f"Analisis residual berdasarkan model: **{model_name}**")
 
         # Tabel & Grafik Residual
-        st.markdown("#### 📈 Residual (Forecast - Actual) per Tahun")
+        st.markdown("#### 📈 Residual (Forecast - Actual) per Year")
         df_resid = df_rolling[["Tahun"]].copy()
         df_resid["Residual"] = residuals
         st.dataframe(df_resid)
