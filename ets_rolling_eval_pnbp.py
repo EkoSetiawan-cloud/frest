@@ -81,13 +81,13 @@ def ets_rolling_eval_page():
         # Plot grafik husus prediksi 1 tahun ke depan
         if not df_future.empty:
             fig2, ax2 = plt.subplots()
-            ax2.plot(df_future["Tahun"], df_future["Forecast"], color="red", marker="o", linestyle="None", markersize=12, label="Forecast 1 Tahun ke Depan")
+            ax2.plot(df_future["Tahun"], df_future["Forecast"], color="red", marker="o", linestyle="None", markersize=12, label="Forecast one-year a head")
             # Tambah label angka di atas titik
             for x, y in zip(df_future["Tahun"], df_future["Forecast"]):
                 ax2.annotate(f"{int(y):,}", (x, y), textcoords="offset points", xytext=(0, 10), ha='center', fontsize=11, color="red")
             ax2.set_xlabel("Tahun")
             ax2.set_ylabel("Forecast PNBP")
-            ax2.set_title(f"Forecast PNBP Tahun {df_future['Tahun'].iloc[0]}")
+            ax2.set_title(f"Forecast {df_future['Tahun'].iloc[0]}")
             ax2.legend()
             st.pyplot(fig2)
         else:
