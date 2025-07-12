@@ -74,7 +74,7 @@ def ets_rolling_eval_page():
             df_future = pd.DataFrame({"Tahun": [], "Forecast": []})
 
         # Tampilkan tabel prediksi 1 tahun ke depan
-        st.subheader("🔮 Prediksi PNBP Satu Tahun ke Depan")
+        st.subheader("🔮 Forecast one-year periode a head")
         st.write("Prediksi ini menggunakan seluruh data historis hingga tahun terakhir (2024).")
         st.write(df_future)
 
