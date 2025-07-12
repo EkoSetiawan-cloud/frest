@@ -53,7 +53,7 @@ def ets_rolling_eval_page():
         fig, ax = plt.subplots()
         ax.plot(df_eval["Tahun"], df_eval["Actual"], label="Actual", marker="o")
         ax.plot(df_eval["Tahun"], df_eval["Forecast"], label="ETS Forecast", marker="o")
-        ax.set_xlabel("Tahun")
+        ax.set_xlabel("Year")
         ax.set_ylabel("Total PNBP")
         ax.set_title("ETS Forecast vs Actual (Rolling Forecast)")
         ax.legend()
